@@ -8,15 +8,15 @@
 
 
 </head>
-<body onload="show_list()">
+<body onload="show_list(0)">
 <h1>RPG admin panel</h1>
 
 <label for="count_1">Count per page:</label>
-<select id="count_1" onchange="show_list()">
+<select id="count_1" onchange="show_list(0)">
     <option value="3">3</option>
-    <option value="3">5</option>
-    <option value="3">10</option>
-    <option value="3">20</option>
+    <option value="5">5</option>
+    <option value="10">10</option>
+    <option value="20">20</option>
 
 </select>
 
@@ -40,11 +40,25 @@ Pages:
 </div>
 
 <script>
-    function show_list(){
+    function show_list(page_number){
 
         $("tr:has(td)").remove();
 
-        let url = "/rest/players";
+        let url = "/rest/players?";
+
+        let countPerPage = $("#count_1").val();
+        if(countPerPage == null){
+            countPerPage = 3;
+        }
+
+        url = url.concat("pageSize=").concat(countPerPage);
+
+        if(page_number == null){
+            page_number = 0;
+        }
+
+        url = url.concat("&pageNumber=").concat(page_number);
+
         $.get(url, function (response){
             $.each(response, function (i, item){
                 $('<tr>').html("<td>"
@@ -63,11 +77,8 @@ Pages:
         } );
 
         let totalCount = getTotalCount();
-        let countPerPage = $("#count_1").val();
 
-        if(countPerPage == null){
-            countPerPage = 3;
-        }
+
 
         let pagesCount = Math.ceil(totalCount/countPerPage);
 
@@ -77,10 +88,12 @@ Pages:
             let button_tag = "<button>" + (i+1) +"</button>";
             let btn = $(button_tag)
                 .attr('id', "paging_button_" +i)
-                .attr('onclick', "show_list()")
+                .attr('onclick', "show_list(" + i +")")
                 .addClass('pgn_bnt_styled');
             $('#paging_buttons').append(btn);
         }
+
+        let identifier = "#paging_button_" + page_number;
 
 
     }
